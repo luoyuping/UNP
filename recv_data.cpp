@@ -48,7 +48,7 @@ int main (int argc,char* argv[])
    int length = sizeof(recv_bufsize);
    //getsockopt(sock,SOL_SOCKET,SO_SNDBUF,&recv_bufsize,(socklen_t *)&(sizeof(int))); 不能取常量的地址
 
-   getsockopt(sock,SOL_SOCKET,SO_RCVBUF,&recv_bufsize,(socklen_t *)&length);// 不能取常量的地址
+   getsockopt(sock,SOL_SOCKET,SO_SNDBUF,&recv_bufsize,(socklen_t *)&length);// 不能取常量的地址
    
    cout << "the recv buff is "<< recv_bufsize << endl;
    int ret = bind(sock,(struct sockaddr*)&server,sizeof(server));
@@ -61,7 +61,9 @@ int main (int argc,char* argv[])
    struct sockaddr_in client;
 
    socklen_t client_len  = sizeof(struct sockaddr_in);
-
+   //setsockopt(sock,SOL_SOCKET,SO_REVBUF,&recv_bufsize,sizeof(recv_bufsize));
+   //cout << "the tcp buff size after setting is" << 
+   //int client_len = sizeof(client);
    int connfd = accept(sock,(struct sockaddr*)&client,&client_len);
 
    if(connfd < 0)
