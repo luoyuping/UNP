@@ -8,7 +8,6 @@
 #include <string.h>
 #include <iostream>
 #include <errno.h> 
-
 #include <iostream> 
 #define BUFFSIZE 1024
 using namespace std;
@@ -17,7 +16,7 @@ using namespace std;
 int main (int argc,char* argv[])
 {
    //main ss
-   if(argc != 4)
+   if(argc != 3)
    {
        cout << "usage : ip + port" << endl;
        return 1;
@@ -76,16 +75,16 @@ int main (int argc,char* argv[])
        char buff[BUFFSIZE];
        memset(buff,0,BUFFSIZE);
 
-       while(int (ret = recv(connfd,buff,BUFFSIZE-1,0)) > 0)
+       while( (ret = recv(connfd,buff,BUFFSIZE-1,0)) > 0)
        {
-           cout << "recv " <<ret <<endl;
+           cout << "recv " <<endl;
+           cout << buff <<endl;
        }
         
        close(connfd);
    }
    
    close(sock);
-
    return 0;
 
 }

@@ -17,7 +17,7 @@ using namespace std;
 int main (int argc,char* argv[])
 {
    //main ss
-   if(argc <= 3)
+   if(argc <= 2)
    {
        cout << "usage : ip + port" << endl;
        return 1;
