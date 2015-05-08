@@ -79,7 +79,7 @@ void ModeLT(epoll_event* events,int number,int epollfd,int listenfd)
             std::cout << "event trigger once" << std::endl;
             memset(buf,BUFFSIZE,0);
          
-            int ret = recv(sockfd,buf,BUFFSIZE-1,0);
+            ssize_t ret = recv(sockfd,buf,BUFFSIZE-1,0);
          
             if(ret < 0)
             {
@@ -103,14 +103,14 @@ void ModeET(epoll_event* events,int number,int epollfd,int listenfd)
     for(int i =0; i <number;i++)
     {
         int sockfd = events[i].data.fd;
-        if(fd == listenfd)
+        if(sockfd == listenfd)
         {
             struct sockaddr_in client_addr;
             socklen_t client_addrlen = sizeof(client_addr);
                        
-            int connfd = accept(listenfd,(struct sockaddr*)client_addr,&client_addrlen);
+            int connfd = accept(listenfd,(struct sockaddr*)&client_addr,&client_addrlen);
                                                 
-            addfd(epollfd,connfd);
+            addfd(epollfd,connfd,true);
         }
       
         else if(events[i].events & EPOLLIN)
@@ -122,7 +122,7 @@ void ModeET(epoll_event* events,int number,int epollfd,int listenfd)
                 int ret = recv(sockfd,buf,BUFFSIZE-1,0);
                 if(ret < 0)
                 {
-                    if((errno = EAGIN) ||(errno == EWOULDBLOCK))
+                    if((errno = EAGAIN) ||(errno == EWOULDBLOCK))
                     {
                         std::cout <<"read latter" <<std::endl;
                         break;
@@ -163,13 +163,36 @@ int main (int argc,char* argv[])
     memset(server_addr,0,sizeof(sockaddr_in));
 
     server_addr.sin_family = PF_INET;
+    inet_pton(AF_INET,ip,&server_addr.sin_addr);
+    server_addr.sin_port = htons(port);
+
+
+    int listenfd = socket(PF_INET,SOCK_STREAM,0);
+
+    assert(listenfd >= 0);
+
+    ret = bind(listenfd,(struct sockaddr*)&server_addr,sizeof(server_addr));
+    assert(ret > 0);
+    ret = listen(listenfd,5);
     
+    epoll_event events[MAX_EVENT_NUMBER];
+    int epollfd =epoll_create(5);
+    assert(epollfd != -1);
+    addfd(epollfd,listenfd,true);
 
+    while(1)
+    {
+        int ret = epoll_wait(epollfd,events,MAX_EVENT_NUMBER,-1);
+        if( ret < 0)
+        {
+            std::cout << "epoll error" <<std::endl;
+            break;
+        }
+        ModeLT(events,ret,epollfd,listenfd);
+        //ModeET(events,ret,epollfd,listenfd);
+    }
 
-
-
-
-
+    close(listenfd);
     return 0;
 }
 
